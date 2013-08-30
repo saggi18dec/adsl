@@ -4,6 +4,7 @@ curl http://ci2.weblogssl.com/job/LPdeployprod/lastSuccessfulBuild/artifact/amaz
 echo $BUILD_NUMBER > LPdeployprodBuildNumber
 echo codebase=lp2 > param
 '''
+
 job {
     name 'L_LPdeployprod'
     customWorkspace("/var/www/lp2")
