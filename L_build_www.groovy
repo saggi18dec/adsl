@@ -35,7 +35,7 @@ mv www.gz $WORKSPACE
 job {
     name 'L_build_www'
     scm {
-        git('git@github.com:agilemedialab/LPbackend.git', 'origin/master')
+        cloneWorkspace('L_LPbackend', 2)
     }
     label('F_job_slave')
     logRotator(-1,30)
