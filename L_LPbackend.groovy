@@ -1,3 +1,10 @@
+def shellCommand = '''
+sh bin/update-lp2conf.sh
+composer.phar update
+echo $BUILD_NUMBER>LPbackendBuildNumber
+echo codebase=LPbackend > param
+'''
+
 job {
     name 'L_LPbackend'
     scm {
@@ -7,14 +14,7 @@ job {
     label('F_job_slave')
     logRotator(-1,30)
     steps {
-        shell(
-'''
-sh bin/update-lp2conf.sh
-composer.phar update
-echo $BUILD_NUMBER>LPbackendBuildNumber
-echo codebase=LPbackend > param
-'''
-        )
+        shell(shellCommand)
     }
     publishers {
         publishCloneWorkspace('*')
