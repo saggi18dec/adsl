@@ -1,18 +1,27 @@
 job {
-    name 'L_LPdeployprod'
-    customWorkspace("/var/www/lp2")
-  label('F_job_slave')
- steps {
-    shell("curl http://ci2.weblogssl.com/job/LPdeployprod/lastSuccessfulBuild/artifact/amazon-prod/lightpress.tgz > LPdeployprod.tgz")
-    shell('echo $BUILD_NUMBER > LPdeployprodBuildNumber')
-    shell('echo codebase=lp2 > param')
- }
- publishers {
-   archiveArtifacts("LPdeployprod.tgz,LPdeployprodBuildNumber")
-   downstreamParameterized() {
-      trigger('build_www') {
-        propertiesFile('param')
-      }
-   }
- }
+    name 'L_Migrations'
+    customWorkspace("/var/www/LPbackend")
+    scm {
+        git('git@github.com:agilemedialab/LPbackend.git', 'origin/master')
+    }
+    label('F_job_slave')
+    logRotator(-1,50)
+    steps {
+        copyArtifacts('F_Migrations', '*') {
+            latestSuccessful()
+        }
+        shell(
+            'git diff `git log -1 | grep Merge: | cut -f 2 -d ':'` | grep "app/DoctrineMigration" || exit 0' &&
+            'sh bin/update-lp2conf.sh' &&
+            'composer.phar self-update' &&
+            'composer.phar update' &&
+            'mysql -u root testdb < testdb.sql' &&
+            'rm -rf  *.sql' &&
+            'ant schema-update' &&
+            'mysqldump -u root testdb > testdb.sql'
+        )
+    }
+    publishers {
+        archiveArtifacts("testdb.sql")
+    }
 }
