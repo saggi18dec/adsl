@@ -1,3 +1,13 @@
+def shellCommand = '''
+mysql -u root testbackend < testdb.sql
+/home/ec2-user/composer.phar self-update
+echo codebase=Agilemedialab > param
+rm -rf *.gz
+rm -rf vendor
+tar -zcf agilemedialab.gz *
+echo $BUILD_NUMBER > AgilemedialabBuildNumber
+'''
+
 job {
     name 'L_Agilemedialab'
     scm {
@@ -10,13 +20,7 @@ job {
         copyArtifacts('F_Migrations', '*') {
             latestSuccessful()
         }
-        shell("mysql -u root testbackend < testdb.sql")
-        shell("/home/ec2-user/composer.phar self-update")
-        shell("echo codebase=Agilemedialab > param")
-        shell("rm -rf *.gz")
-        shell("rm -rf vendor")
-        shell("tar -zcf agilemedialab.gz *")
-        shell('echo $BUILD_NUMBER > AgilemedialabBuildNumber')
+        shell(shellCommand)
     }
     publishers {
         archiveArtifacts("*.gz,AgilemedialabBuildNumber")
