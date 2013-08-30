@@ -35,7 +35,7 @@ mv www.gz $WORKSPACE
 job {
     name 'L_build_www'
     scm {
-        cloneWorkspace('L_LPbackend', 2)
+        cloneWorkspace('L_LPbackend', 'Successful')
     }
     label('F_job_slave')
     logRotator(-1,30)
