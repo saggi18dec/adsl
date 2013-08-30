@@ -13,5 +13,11 @@ job {
  }
  publishers {
    publishCloneWorkspace('*')
+   archiveArtifacts("LPbackendBuildNumber")
+   downstreamParameterized() {
+      trigger('build_www') {
+        propertiesFile('param')
+      }
+   }
  }
 }
