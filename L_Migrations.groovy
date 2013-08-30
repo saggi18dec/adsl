@@ -5,7 +5,7 @@ job {
         git('git@github.com:agilemedialab/LPbackend.git', 'origin/master')
     }
     label('F_job_slave')
-    logRotator(-1,50)
+    logRotator(-1,30)
     steps {
         copyArtifacts('F_Migrations', '*') {
             latestSuccessful()
