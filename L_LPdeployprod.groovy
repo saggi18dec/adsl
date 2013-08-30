@@ -8,7 +8,6 @@ job {
     shell('echo codebase=lp2 > param')
  }
  publishers {
-   publishCloneWorkspace('*')
    archiveArtifacts("LPdeployprod.tgz,LPdeployprodBuildNumber")
    downstreamParameterized() {
       trigger('build_www') {
