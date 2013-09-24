@@ -39,33 +39,83 @@ job {
     }
     label('F_job_slave')
     logRotator(-1,30)
-    steps {
-        copyArtifacts('L_Agilemedialab', '*') {
-            latestSuccessful()
-        }
-    }
     parameters {
         stringParam('codebase', 'LPbackend')
     }
+    
     configure {
         def nodeBuilder = it / 'builders'
-//        def attributes = [plugin:'conditional-buildstep@1.2.2']
-//        def buildConditionalStepSingleNode = nodeBuilder / 'org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder'(attributes)
-//        def conditionAttributes = [class:"org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition", plugin:'run-condition@0.10']
-//        def conditionNode = buildConditionalStepSingleNode / 'condition'(conditionAttributes)
-//        def argFirst = conditionNode / arg1
-//        argFirst.setValue("")
-//        def argSecond = conditionNode / arg2
-//        argSecond.setValue("")
-//        def argIgnoreCase = conditionNode / ignoreCase
-//        argIgnoreCase.setValue("false")
-//
-//        def successAttributes = [class:'hudson.tasks.Shell']
-//        def successNode = buildConditionalStepSingleNode / 'buildStep'(successAttributes) {
-//            command 'hello'
-//        }
-//
-//        def failureAttributes = [class:'org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail', 'plugin':'run-condition@0.10']
-//        def failureNode = buildConditionalStepSingleNode / 'runner'(failureAttributes)
+        def attributes = [plugin:'conditional-buildstep@1.2.2']
+        def buildConditionalStepSingleNode = nodeBuilder / 'org.jenkinsci.plugins.conditionalbuildstep.ConditionalBuilder'(attributes)
+
+        def failureAttributes = [class:'org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail', 'plugin':'run-condition@0.10']
+        def failureNode = buildConditionalStepSingleNode / 'runner'(failureAttributes)
+
+        def conditionAttributes = [class:"org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition", plugin:'run-condition@0.10']
+        def conditionNode = buildConditionalStepSingleNode / 'runCondition'(conditionAttributes)
+        def argFirst = conditionNode / arg1
+        argFirst.setValue('${codebase}')
+
+        def argSecond = conditionNode / arg2
+        argSecond.setValue("Agilemedialab")
+
+        def argIgnoreCase = conditionNode / ignoreCase
+        argIgnoreCase.setValue("false")
+
+        def conditionalBuildersNode = buildConditionalStepSingleNode / 'conditionalbuilders'
+
+        def copyArtifactAttributes = [plugin: "copyartifact@1.25"]
+
+        def selectorAttributes = [class: "hudson.plugins.copyartifact.StatusBuildSelector"]
+
+        def artifactNode = conditionalBuildersNode / 'hudson.plugins.copyartifact.CopyArtifact'(copyArtifactAttributes) {
+            projectName 'L_Agilemedialab'
+            filter '*'
+            target ''
+        }
+
+        def selectorNode = artifactNode / 'selector'(selectorAttributes)
+
+        def shellNode = conditionalBuildersNode / 'hudson.tasks.Shell'() {
+            command shellAgilemedialab
+        }
+
+    }
+    steps {
+        copyArtifacts('L_LPbackend', 'LPbackendBuildNumber') {
+            latestSuccessful()
+        }
+        copyArtifacts('L_LPdeployprod', '*') {
+            latestSuccessful()
+        }
+
+        shell(shellCommand)
+
+        copyArtifacts('L_Migrations', 'testdb.sql') {
+            latestSuccessful()
+        }
+        shell(shellCommand2)
+        
+        shell(shellCommand3)
+    }
+    
+    publishers {
+        archiveArtifacts("WWWBuildnumber,LPbackendBuildNumber,LPdeployprodBuildNumber,www.gz")
+
+        configure {
+            def nodeBuilderPublisher = it / 'publishers'
+
+            def publisherAttributes = [plugin: "s3@0.3.2"]
+
+            def publisherNode = nodeBuilderPublisher / 'hudson.plugins.s3.S3BucketPublisher'(publisherAttributes) {
+                profileName 'wsl'
+            }
+
+            def entriesPublisher = publisherNode / 'entries' / 'hudson.plugins.s3.Entry'() {
+                bucket 'eu-wsl-images/LPbackend/testing/v3/js'
+                sourceFile 'tmp2/js/*.js'
+            }
+        }
+        downstream('build_www')
     }
 }
