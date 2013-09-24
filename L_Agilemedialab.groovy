@@ -17,7 +17,7 @@ job {
     label('F_job_slave')
     logRotator(-1,30)
     steps {
-        copyArtifacts('F_Migrations', '*') {
+        copyArtifacts('L_Migrations', '*') {
             latestSuccessful()
         }
         shell(shellCommand)

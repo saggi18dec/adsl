@@ -47,25 +47,4 @@ job {
     parameters {
         stringParam('codebase', 'LPbackend')
     }
-    configure {
-        def nodeBuilder = it / 'builders'
-        def attributes = [plugin:'conditional-buildstep@1.2.2']
-        def buildConditionalStepSingleNode = nodeBuilder / 'org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder'(attributes)
-        def conditionAttributes = [class:"org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition", plugin:'run-condition@0.10']
-        def conditionNode = buildConditionalStepSingleNode / 'condition'(conditionAttributes)
-        def argFirst = conditionNode / arg1
-        argFirst.setValue("")
-        def argSecond = conditionNode / arg2
-        argSecond.setValue("")
-        def argIgnoreCase = conditionNode / ignoreCase
-        argIgnoreCase.setValue("false")
-
-        def successAttributes = [class:'hudson.tasks.Shell']
-        def successNode = buildConditionalStepSingleNode / 'buildStep'(successAttributes) {
-            command 'hello'
-        }
-
-        def failureAttributes = [class:'org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail', 'plugin':'run-condition@0.10']
-        def failureNode = buildConditionalStepSingleNode / 'runner'(failureAttributes)
-    }
 }
