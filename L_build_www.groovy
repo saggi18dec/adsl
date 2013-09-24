@@ -52,7 +52,7 @@ job {
         def attributes = [plugin:'conditional-buildstep@1.2.2']
         def buildConditionalStepSingleNode = nodeBuilder / 'org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder'(attributes)
         def conditionAttributes = [class:"org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition", plugin:'run-condition@0.10']
-        def conditionNode = buildConditionalStepSingleNode / 'condition'(conditionAttributes)
+        def conditionNode = buildConditionalStepSingleNode / 'runCondition'(conditionAttributes)
         def argFirst = conditionNode / arg1
         argFirst.setValue("")
         def argSecond = conditionNode / arg2
