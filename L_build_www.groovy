@@ -50,7 +50,11 @@ job {
     configure {
         def nodeBuilder = it / 'builders'
         def attributes = [plugin:'conditional-buildstep@1.2.2']
-        def buildConditionalStepSingleNode = nodeBuilder / 'org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder'(attributes)
+        def buildConditionalStepSingleNode = nodeBuilder / 'org.jenkinsci.plugins.conditionalbuildstep.ConditionalBuilder'(attributes)
+
+        def failureAttributes = [class:'org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail', 'plugin':'run-condition@0.10']
+        def failureNode = buildConditionalStepSingleNode / 'runner'(failureAttributes)
+        
         def conditionAttributes = [class:"org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition", plugin:'run-condition@0.10']
         def conditionNode = buildConditionalStepSingleNode / 'runCondition'(conditionAttributes)
         def argFirst = conditionNode / arg1
@@ -65,7 +69,5 @@ job {
             command 'hello'
         }
 
-        def failureAttributes = [class:'org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail', 'plugin':'run-condition@0.10']
-        def failureNode = buildConditionalStepSingleNode / 'runner'(failureAttributes)
     }
 }
